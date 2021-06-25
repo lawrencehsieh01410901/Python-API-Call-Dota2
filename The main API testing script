@@ -1,0 +1,214 @@
+### 1. Import packages & show it's current version.
+import pandas as pd
+import numpy as np
+import json
+import requests
+import time
+
+print(f"""Pandas {pd.__version__},
+Numpy {np.__version__},
+JSON {json.__version__},
+Requests {requests.__version__},
+Time {time}""")
+
+## 2. Use SQL Database style to request the user IDs & save as txt file
+### The SQL style request are as follows:
+### ("%20" stands for "space" in SQL command line) 
+
+#https://api.opendota.com/api/explorer?sql=SELECT%20account_id%20FROM%20players%20WHERE%20players.last_match_time%20%3E%3D%20to_timestamp(extract(epoch%20from%20timesamp%20'2020-07-19T23%3A00%3A00.000Z'))%20AND%20fh_unavailable%20is%20false%20LIMIT%2050000
+return_data = requests.get("https://api.opendota.com/api/explorer?sql=SELECT%20account_id%20FROM%20players%20WHERE%20players.last_match_time%20%3E%3D%20to_timestamp(extract(epoch%20from%20timestamp%20'2020-07-19T23%3A00%3A00.000Z'))%20AND%20fh_unavailable%20is%20false%20LIMIT%2050000")
+
+after_data = return_data.json()
+after_data
+
+## In return results, dictionary key 'rows' contains the values that we want.
+targ_data = after_data['rows']
+targ_data
+
+test = pd.DataFrame.from_dict(targ_data)
+test.head(n = 6)
+
+test.to_csv("ID_Long_List.csv", index = False)
+
+### At this point, we have the ID numbers.
+
+#### According to previous testing experience, calling each information matching to 1 ID, average will take 1 sec.
+
+#### Total data requests = 50000 IDs x 4 types of information (WL, Totals, WardMap, & WordCloud) request times
+####                                   = 50000 x 4
+####                                   = 200000 (Two hundred thousand seconds)
+
+#### Estimate time = (200000 / 60) / 60 == 3333.33 mins == 55.55 hrs
+
+### In order to save time, IDs will be split into multiple (5 parts) lists, 
+### So that we can run several API call programs imultaneously
+#### For multiple API Call programs to run simultaneously, to save time and boost up speed.
+
+#Splitting IDs
+
+root_ID = pd.read_csv("ID_Long_List.csv")
+root_ID.head(n = 5)
+#Testing API_CALLS under each variables
+#How to append the results
+root_ID.shape
+
+target_ID_1 = list(root_ID.account_id[0:10000])
+print(len(target_ID_1))
+#print(target_ID_1[0:10])
+print(f"1 Head: {target_ID_1[:5]}")
+print(f"1 Last: {target_ID_1[-5:]}")
+
+target_ID_2 = list(root_ID.account_id[10000:20000])
+print(len(target_ID_2))
+print(f"2 Head: {target_ID_2[:5]}")
+print(f"2 Last: {target_ID_2[-5:]}")
+
+target_ID_3 = list(root_ID.account_id[20000:30000])
+print(len(target_ID_3))
+print(f"3 Head: {target_ID_3[:5]}")
+print(f"3 Last: {target_ID_3[-5:]}")
+
+target_ID_4 = list(root_ID.account_id[30000:40000])
+print(len(target_ID_4))
+print(f"4 Head: {target_ID_4[:5]}")
+print(f"4 Last: {target_ID_4[-5:]}")
+
+target_ID_5 = list(root_ID.account_id[40000:])
+print(len(target_ID_5))
+print(f"5 Head: {target_ID_5[:5]}")
+print(f"5 Last: {target_ID_5[-5:]}")
+
+### Before calling ID information, we need to know the return results first
+#### Establishing testing ID list
+#First 5 IDs
+
+testing_ID = list(root_ID.account_id[0:5])
+testing_ID
+
+### The return results of WL, Totals, WardMap & WordCloud.
+while the API key for massive data calls are as follows: api_key=e11aabd8-0b6e-4c0e-a6e9-991212795b57
+#Sorry I use xxx-xxx-xxx to replace the actual api key otherwise it will start charging me feeds.
+#wl
+datawlDB = []
+
+for api_calls in testing_ID:
+    print(f"ID number: {api_calls}")
+
+    data = requests.get(f"https://api.opendota.com/api/players/{api_calls}/wl?api_key=e11aabd8-0b6e-4c0e-a6e9-991212795b57")
+    afterdata = data.json()
+    datawlDB.append(afterdata)
+    time.sleep(0.5)
+
+print("Done.") #Make sure that the For-Loop is done!
+datawlDB
+
+#total
+datatotalsDB = []
+
+for x in testing_ID:
+    print(f"ID number: {x}")
+
+    data = requests.get(f'https://api.opendota.com/api/players/{x}/totals')
+    afterdata = data.json()
+    datatotalsDB.append(afterdata)
+    time.sleep(0.5)
+
+print("Done.")
+datatotalsDB
+
+#wardmap
+datawardmapDB = []
+
+for x in testing_ID:
+    print(f"ID number: {x}")
+
+    data = requests.get(f'https://api.opendota.com/api/players/{x}/wardmap')
+    afterdata = data.json()
+    datawardmapDB.append(afterdata)
+    time.sleep(0.5)
+
+print("Done.")
+datawardmapDB
+
+#wordcloud
+datawordcloudDB = []
+
+for x in testing_ID:
+    print(f"ID number: {x}")
+
+    data = requests.get(f'https://api.opendota.com/api/players/{x}/wordcloud')
+    afterdata = data.json()
+    datawordcloudDB.append(afterdata)
+    time.sleep(0.5)
+
+print("Done.")
+datawordcloudDB
+### All of them return within a list [].
+
+### Now for the Large-Scale API Call part
+### Demostrating Part.1 using testing list 1 ~ 5 IDs, for real part please view 1. ~ 5.ipynb
+
+#ID too long, split them into "FIVE" parts!!!
+root_ID = pd.read_csv("ID_Long_List.csv")
+
+target_ID_1 = list(root_ID.account_id[0:5])
+print(len(target_ID_1))
+print(f"Part 1 Head 5: {target_ID_1[:5]}") #Double check with the Excel sheet whether not the ID numbers matched?
+print(f"Part 1 Last 5: {target_ID_1[-5:]}") #Double check with the Excel sheet whether not the ID numbers matched?
+
+
+wl_DB = []
+totalsDB = []
+wardmapDB = []
+wordcloudDB = []
+
+for x in target_ID_1:
+    print(f"ID number: {x}")
+
+    data1 = requests.get(f'https://api.opendota.com/api/players/{x}/wl?api_key=0432964d-ade1-439d-a62c-75fc48f9d94e')
+    after1 = data1.json()
+    wl_DB.append(after1)
+
+    data2 = requests.get(f'https://api.opendota.com/api/players/{x}/totals?api_key=0432964d-ade1-439d-a62c-75fc48f9d94e')
+    after2 = data2.json()
+    totalsDB.append(after2)
+
+    data3 = requests.get(f'https://api.opendota.com/api/players/{x}/wardmap?api_key=0432964d-ade1-439d-a62c-75fc48f9d94e')
+    after3 = data3.json()
+    wardmapDB.append(after3)
+
+    data4 = requests.get(f'https://api.opendota.com/api/players/{x}/wordcloud?api_key=0432964d-ade1-439d-a62c-75fc48f9d94e')
+    after4 = data4.json()
+    wordcloudDB.append(after4)
+    time.sleep(0.5)
+
+print("Done.")
+print("Now writing files")
+
+with open('WLDB1.txt', 'w') as outfile:
+    json.dump(wl_DB, outfile)
+
+with open('TotalsDB1.txt', 'w') as outfile:
+    json.dump(totalsDB, outfile)
+
+with open('WardmapDB1.txt', 'w') as outfile:
+    json.dump(wardmapDB, outfile)
+
+with open('WordcloudDB1.txt', 'w') as outfile:
+    json.dump(wordcloudDB, outfile)
+
+print("ALL Done!!!")
+
+### After saving data into txt files according to their information
+### Append all 5 parts together as 1 full dataset under each folders.
+### Appending WL as example: 
+import glob
+
+read_files = glob.glob("*.txt")
+
+with open("ALL_WL.txt", "wb") as outfile:
+    for f in read_files:
+        with open(f, "rb") as infile:
+            outfile.write(infile.read())
+
+
