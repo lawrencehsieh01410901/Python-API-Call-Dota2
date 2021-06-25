@@ -86,7 +86,7 @@ testing_ID = list(root_ID.account_id[0:5])
 testing_ID
 
 ### The return results of WL, Totals, WardMap & WordCloud.
-while the API key for massive data calls are as follows: api_key=e11aabd8-0b6e-4c0e-a6e9-991212795b57
+while the API key for massive data calls are as follows: api_key=xxxxxx-xxxxxxxxx-xxxxxxxxx
 #Sorry I use xxx-xxx-xxx to replace the actual api key otherwise it will start charging me feeds.
 #wl
 datawlDB = []
@@ -94,7 +94,7 @@ datawlDB = []
 for api_calls in testing_ID:
     print(f"ID number: {api_calls}")
 
-    data = requests.get(f"https://api.opendota.com/api/players/{api_calls}/wl?api_key=e11aabd8-0b6e-4c0e-a6e9-991212795b57")
+    data = requests.get(f"https://api.opendota.com/api/players/{api_calls}/wl?api_key=xxxxxx-xxxxxxxxx-xxxxxxxxx")
     afterdata = data.json()
     datawlDB.append(afterdata)
     time.sleep(0.5)
@@ -145,6 +145,8 @@ print("Done.")
 datawordcloudDB
 ### All of them return within a list [].
 
+###<==================================>Uptill here are all just steps to make sure how the API works and the data it returns.
+
 ### Now for the Large-Scale API Call part
 ### Demostrating Part.1 using testing list 1 ~ 5 IDs, for real part please view 1. ~ 5.ipynb
 
@@ -165,19 +167,19 @@ wordcloudDB = []
 for x in target_ID_1:
     print(f"ID number: {x}")
 
-    data1 = requests.get(f'https://api.opendota.com/api/players/{x}/wl?api_key=0432964d-ade1-439d-a62c-75fc48f9d94e')
+    data1 = requests.get(f'https://api.opendota.com/api/players/{x}/wl?api_key=xxxxxx-xxxxxxxxx-xxxxxxxxx')
     after1 = data1.json()
     wl_DB.append(after1)
 
-    data2 = requests.get(f'https://api.opendota.com/api/players/{x}/totals?api_key=0432964d-ade1-439d-a62c-75fc48f9d94e')
+    data2 = requests.get(f'https://api.opendota.com/api/players/{x}/totals?api_key=xxxxxx-xxxxxxxxx-xxxxxxxxx')
     after2 = data2.json()
     totalsDB.append(after2)
 
-    data3 = requests.get(f'https://api.opendota.com/api/players/{x}/wardmap?api_key=0432964d-ade1-439d-a62c-75fc48f9d94e')
+    data3 = requests.get(f'https://api.opendota.com/api/players/{x}/wardmap?api_key=xxxxxx-xxxxxxxxx-xxxxxxxxx')
     after3 = data3.json()
     wardmapDB.append(after3)
 
-    data4 = requests.get(f'https://api.opendota.com/api/players/{x}/wordcloud?api_key=0432964d-ade1-439d-a62c-75fc48f9d94e')
+    data4 = requests.get(f'https://api.opendota.com/api/players/{x}/wordcloud?api_key=xxxxxx-xxxxxxxxx-xxxxxxxxx')
     after4 = data4.json()
     wordcloudDB.append(after4)
     time.sleep(0.5)
@@ -211,4 +213,4 @@ with open("ALL_WL.txt", "wb") as outfile:
         with open(f, "rb") as infile:
             outfile.write(infile.read())
 
-
+### Repeat the same action onto the rest of the txt files according to their data type.
