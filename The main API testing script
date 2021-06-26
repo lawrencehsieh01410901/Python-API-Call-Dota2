@@ -41,7 +41,7 @@ test.to_csv("ID_Long_List.csv", index = False)
 #### Estimate time = (200000 / 60) / 60 == 3333.33 mins == 55.55 hrs
 
 ### In order to save time, IDs will be split into multiple (5 parts) lists, 
-### So that we can run several API call programs imultaneously
+### So that we can run several API call programs simultaneously
 #### For multiple API Call programs to run simultaneously, to save time and boost up speed.
 
 #Splitting IDs
